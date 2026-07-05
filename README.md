@@ -30,10 +30,8 @@ This project uses Particle Workbench + DeviceOS 5.x.
 npm install -g particle-cli
 particle login
 
-# Install dependencies (libraries pinned in project.properties)
-particle library install SparkFun_VL53L1X
-particle library install adafruit-sht31
-particle library install MQTT
+# Dependencies are pinned in project.properties and resolved by the cloud compiler
+# (SparkFun_VL53L1X_Arduino_Library 1.2.9, adafruit-sht31 1.0.5, MQTT 0.5.6)
 
 # Compile and flash
 particle compile photon2 . --saveTo firmware.bin
@@ -85,6 +83,18 @@ The `WINDOW_OFFSET_MM` accounts for the small distance error introduced by ToF r
 ### Home Assistant
 See `docs/home-assistant.yaml` for a complete HA configuration.
 
+### Postgres + Claude (MCP)
+The `integration/` package ingests MQTT readings into Postgres and exposes the monitor
+to Claude via an MCP server (`get_skimmer_level`, `get_fill_history`, `force_fill`,
+`get_evaporation_rate`). See `integration/README.md` and `docs/SETUP.md`.
+
+## Documentation
+
+- **[docs/SETUP.md](docs/SETUP.md)** — end-to-end setup: firmware → broker → Postgres → Home Assistant → Claude
+- **[docs/README.md](docs/README.md)** — architecture, data flow, full API reference
+- [docs/calibration.md](docs/calibration.md) — window offset calibration procedure
+- [docs/mqtt-schema.md](docs/mqtt-schema.md) — MQTT topic and payload reference
+
 ## Safety Notes
 
 This device controls a water valve. Required safety practices:
@@ -102,18 +112,22 @@ skimmer-monitor/
 ├── src/
 │   ├── skimmer-monitor.ino    Main firmware
 │   └── config.h                Tunable parameters
-├── lib/                        Particle library dependencies
+├── integration/
+│   ├── src/ingest.ts           MQTT → Postgres bridge
+│   ├── src/mcp-server.ts       MCP server exposing skimmer tools to Claude
+│   └── schema.sql              Postgres schema
 ├── hardware/
 │   ├── BOM.md                  Bill of materials with Canadian suppliers
 │   ├── wiring.md               Pin assignments and wiring diagram
 │   └── enclosure.md            Mounting and weatherproofing guide
 ├── docs/
+│   ├── SETUP.md                End-to-end setup guide
+│   ├── README.md               Architecture and API reference
 │   ├── home-assistant.yaml     HA configuration
 │   ├── calibration.md          Step-by-step calibration procedure
 │   └── mqtt-schema.md          MQTT topic reference
 ├── scripts/
-│   ├── monitor.sh              CLI subscriber for testing
-│   └── postgres-ingest.ts      Optional: TS bridge to your existing Postgres
+│   └── monitor.sh              CLI subscriber for testing
 ├── test/
 │   └── bench-test.md           Pre-deployment bench test checklist
 ├── project.properties          Particle CLI manifest
