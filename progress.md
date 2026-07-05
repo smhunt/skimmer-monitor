@@ -32,8 +32,24 @@
 - `force_fill` needs PARTICLE_TOKEN/PARTICLE_DEVICE configured wherever the MCP server runs
 
 **Next**:
-- Deploy ingest bridge to server (10.10.10.24), apply schema.sql, register MCP server with Claude
+- Deploy ingest bridge to server (10.10.10.24), apply schema.sql
 - Order parts, breadboard prototype (Phase 2)
+
+---
+
+## 2026-07-05 — MCP server registered with Claude
+
+**What changed**:
+- Registered the skimmer MCP server with Claude Code at user scope:
+  `claude mcp add skimmer --scope user -- npx tsx .../integration/src/mcp-server.ts`
+- Verified: `claude mcp get skimmer` reports ✔ Connected
+
+**Open issues**:
+- `DATABASE_URL` not yet configured — defaults to `postgresql://localhost/iot`; data tools will error until the ingest pipeline is deployed and reachable. Re-register with `--env DATABASE_URL=...` once known.
+- `force_fill` requires `PARTICLE_TOKEN` / `PARTICLE_DEVICE` env — add via `--env` after the Photon 2 is claimed.
+
+**Next**:
+- Apply schema.sql + run ingest bridge under PM2 on the Mosquitto/Postgres host (10.10.10.24), then re-register MCP server with real DATABASE_URL
 
 ---
 
