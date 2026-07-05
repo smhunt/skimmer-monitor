@@ -1,0 +1,23 @@
+# Particle build artifacts
+*.bin
+*.elf
+*.map
+.particle/
+target/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Node
+node_modules/
+dist/
+*.log
+
+# Local config overrides
+src/secrets.h
+.env
+.env.local

@@ -1,0 +1,142 @@
+# Home Assistant configuration for Skimmer Water Level Monitor
+# Add to configuration.yaml or use as a !include file
+
+mqtt:
+  sensor:
+    - name: "Skimmer Water Level"
+      unique_id: skimmer_water_level
+      state_topic: "pool/skimmer/level"
+      unit_of_measurement: "mm"
+      device_class: distance
+      state_class: measurement
+      device: &skimmer_device
+        identifiers:
+          - skimmer_photon_01
+        name: "Pool Skimmer Monitor"
+        manufacturer: "EcoWorks"
+        model: "Photon 2"
+
+    - name: "Skimmer Temperature"
+      unique_id: skimmer_temperature
+      state_topic: "pool/skimmer/temperature"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      device: *skimmer_device
+
+    - name: "Skimmer Humidity"
+      unique_id: skimmer_humidity
+      state_topic: "pool/skimmer/humidity"
+      unit_of_measurement: "%"
+      device_class: humidity
+      state_class: measurement
+      device: *skimmer_device
+
+    - name: "Skimmer Battery"
+      unique_id: skimmer_battery
+      state_topic: "pool/skimmer/battery"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      device: *skimmer_device
+
+    - name: "Skimmer Fills Today"
+      unique_id: skimmer_fills_today
+      state_topic: "pool/skimmer/fills_today"
+      state_class: total
+      device: *skimmer_device
+
+    - name: "Skimmer Total Fills"
+      unique_id: skimmer_total_fills
+      state_topic: "pool/skimmer/total_fills"
+      state_class: total_increasing
+      device: *skimmer_device
+
+  binary_sensor:
+    - name: "Skimmer Low Water"
+      unique_id: skimmer_low_water
+      state_topic: "pool/skimmer/level"
+      value_template: "{{ 'ON' if (value | float) < 80 else 'OFF' }}"
+      device_class: problem
+      device: *skimmer_device
+
+    - name: "Skimmer Low Battery"
+      unique_id: skimmer_low_battery
+      state_topic: "pool/skimmer/battery"
+      value_template: "{{ 'ON' if (value | float) < 3.5 else 'OFF' }}"
+      device_class: battery
+      device: *skimmer_device
+
+# Automations
+automation:
+  - alias: "Skimmer Leak Alert"
+    description: "Alert if daily fill count exceeds threshold"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.skimmer_fills_today
+        above: 4
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Pool Leak Warning"
+          message: "Skimmer auto-fill triggered {{ states('sensor.skimmer_fills_today') }} times today — check for leaks"
+
+  - alias: "Skimmer No-Rise Abort"
+    description: "Alert on stuck valve detection"
+    trigger:
+      - platform: mqtt
+        topic: "skimmer/alert"
+        payload: "no-rise-aborting"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Skimmer Fill Aborted"
+          message: "Water not rising during fill — check valve and hose"
+
+  - alias: "Skimmer Condensation"
+    trigger:
+      - platform: mqtt
+        topic: "skimmer/alert"
+        payload: "condensation"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "Skimmer Condensation"
+          message: "High humidity inside enclosure — replace silica gel"
+
+# Template sensors for derived metrics
+template:
+  - sensor:
+      - name: "Skimmer Evaporation 24h"
+        unit_of_measurement: "mm"
+        state: >
+          {% set hist = state_attr('sensor.skimmer_water_level', 'history_24h') %}
+          {% if hist %}
+            {{ (hist[0] - hist[-1]) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+
+# Lovelace card example (add to dashboard YAML):
+#
+# type: vertical-stack
+# title: Pool Skimmer
+# cards:
+#   - type: gauge
+#     entity: sensor.skimmer_water_level
+#     min: 0
+#     max: 250
+#     severity:
+#       green: 100
+#       yellow: 80
+#       red: 0
+#   - type: entities
+#     entities:
+#       - sensor.skimmer_fills_today
+#       - sensor.skimmer_battery
+#       - sensor.skimmer_humidity
+#       - sensor.skimmer_temperature
+#   - type: history-graph
+#     entities:
+#       - sensor.skimmer_water_level
+#     hours_to_show: 48
