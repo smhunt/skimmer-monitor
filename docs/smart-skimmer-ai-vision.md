@@ -193,8 +193,65 @@ displace Phases 2–5 in `prompt_plan.md`.
   noise? Revisit after Phase C data exists.
 - **Automated dosing:** deliberately deferred. Chemical injection has a worse failure mode
   than the water valve. Requires its own interlock design and review.
+- **Target market — pool vs. spa (or both):** hot tub / spa health may be the stronger,
+  easier-to-win wedge (see §9). Decide sequencing before committing hardware.
 
-## 9. Relationship to the Existing System
+## 9. Adjacent Market: Hot Tub / Spa Health
+
+A pool is not the only — or even the best — home for this system. **Spas and hot tubs may
+be a larger and easier-to-win market**, and the AI-health architecture in §4–6 arguably
+fits them *better* than it fits pools. Worth a serious look before committing to a
+pool-first roadmap.
+
+### Why spas may be the stronger wedge
+
+- **Chemistry is the whole ballgame.** A spa holds ~1,500–2,000 L vs. a pool's 50,000+ L.
+  Small volume means chemistry swings *fast* — a single soak can crater sanitizer and
+  spike pH within an hour. Continuous chemistry monitoring, which is a nice-to-have on a
+  slow-moving pool, becomes genuinely valuable on a spa.
+- **Heat amplifies everything.** At 38 °C, chlorine/bromine depletes rapidly, scale risk
+  (Langelier) climbs, and off-gassing accelerates. Owners are told to test **daily or
+  twice-daily by hand** — a real, recurring pain point the AI layer directly removes.
+- **Bather load per litre is extreme.** Turbidity and sanitizer crash quickly after use,
+  making the clarity + ORP early-warning story more compelling, not less.
+- **Year-round use = year-round value.** Canadian pools are seasonal (~4 months); hot tubs
+  run 12 months. Continuous data means continuous engagement — a far better retention and
+  subscription story.
+- **Retrofit-friendly, no drilling.** No skimmer lid to fabricate. The chemistry head goes
+  **inline at the spa pack** or as a **floating sensor** — and §4/§8 already lean *inline*
+  for chemistry, so the spa case actually *simplifies* the design.
+- **Mains power is right there.** The equipment pack has continuous power, killing the
+  battery/solar constraint that dominates the skimmer BOM. The separate-power-domain sense
+  board (§4) becomes the *primary* board, not an add-on.
+- **Engaged, tech-forward owners.** Spa owners already buy test strips, apps, and
+  automation; the willingness-to-pay for "stop testing by hand" is established.
+
+### What changes for spas
+
+- **Sanitizer chemistry differs.** Many spas run **bromine**, not chlorine — ORP
+  interpretation and dose math need a bromine mode. Some use biguanide/mineral systems
+  (no ORP signal at all) — detect and degrade gracefully.
+- **The "skimmer as listening post" framing drops away.** Spas have a weir/filter, not a
+  true skimmer. The value prop shifts fully to the **inline chemistry head** — which is
+  the part that generalizes; the level/auto-fill firmware is pool-specific and largely
+  irrelevant here.
+- **Harsher sensing environment.** Higher temp, foam, biofilm, and jet aeration stress the
+  probes and add noise. Spec probes for sustained 40 °C+ and expect more frequent recal.
+- **Water-level auto-fill is a non-goal.** Spas are topped up manually and infrequently, so
+  the safety-critical valve control — the reason the pool firmware is conservative — mostly
+  falls away. That makes a spa product a **cleaner, more self-contained build**: it *is*
+  the "entirely new system," without a legacy safety envelope wrapped around it.
+
+### Recommendation
+
+Treat **spa health as a parallel target, not a detour.** The analyzer service, MQTT/Postgres
+contract, and MCP/Claude AI layer (§5–6) are shared across both; only the sensing front-end
+and the chlorine-vs-bromine dose math diverge. A sensible sequencing question for Sean:
+**lead with spa** (self-contained, year-round, mains-powered, chemistry-first) and let the
+pool integration reuse the same analyzer — or keep pool-first because the hardware already
+exists. This belongs on the Phase-0 decision list alongside the second-MCU choice.
+
+## 10. Relationship to the Existing System
 
 | Existing | This exploration |
 |----------|------------------|
