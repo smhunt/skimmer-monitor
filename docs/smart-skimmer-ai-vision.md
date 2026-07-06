@@ -251,6 +251,10 @@ and the chlorine-vs-bromine dose math diverge. A sensible sequencing question fo
 pool integration reuse the same analyzer — or keep pool-first because the hardware already
 exists. This belongs on the Phase-0 decision list alongside the second-MCU choice.
 
+> Fleshed out in the spa-first companion doc:
+> [`spa-health-monitor.md`](spa-health-monitor.md) — BOM sketch, bromine-vs-chlorine dose
+> math, and the floating-vs-inline placement decision.
+
 ## 10. Relationship to the Existing System
 
 | Existing | This exploration |

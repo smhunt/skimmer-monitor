@@ -84,6 +84,35 @@
 
 ---
 
+## 2026-07-06 — Spa/hot-tub companion doc
+
+**What changed**:
+- Added a spa-first market angle to `docs/smart-skimmer-ai-vision.md` (new §9): why hot
+  tubs may be the stronger wedge — small volume + high temp make chemistry the whole
+  product, year-round use, mains power, no auto-fill safety envelope.
+- Wrote `docs/spa-health-monitor.md`: spa-first companion with a draft sensing-head BOM
+  (~CAD $230 bench proto), floating-puck-vs-inline placement tradeoff, bromine-vs-chlorine
+  dose math (deterministic, advisory-only), data-contract delta (`sanitizer_mode`/`cover`),
+  spa-tuned MCP tools, and a shared-brain phased plan (S0–S5).
+
+**Why**:
+- The analyzer/MQTT/Postgres/MCP "brain" is market-agnostic; only the sensing front-end and
+  sanitizer math diverge. Spa is the leading candidate for the first front-end to ship.
+
+**Tested**:
+- None — documentation-only exploration. No hardware spend, no firmware change.
+
+**Open issues**:
+- Placement (lead inline for signal quality, productize puck later), probe life at 38 °C,
+  strip-calibration UX, dosing liability for water people sit in, sales channel. See
+  `spa-health-monitor.md` §9.
+
+**Next**:
+- Sean to pick market sequencing (spa-first vs. pool-first) and sensor placement; then
+  Phase S1 bench chemistry head (galvanic isolation + calibration is make-or-break).
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title
