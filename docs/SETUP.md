@@ -13,11 +13,12 @@ each layer works without the ones after it, so you can stop at any point.
 
 ## 1. Hardware Assembly
 
-1. Wire per [hardware/wiring.md](../hardware/wiring.md): VL53L1X + SHT41 on I²C
-   (D0 SDA / D1 SCL), relay on D7, battery divider on A0.
-2. Bench-test bare board first — enclosure and glass window come later
-   (they need calibration, step 7).
-3. Follow [test/bench-test.md](../test/bench-test.md) before any deployment.
+1. Breadboard first: follow [hardware/breadboard.md](../hardware/breadboard.md) —
+   a staged build with a checkpoint after every subsystem.
+2. Reference wiring details are in [hardware/wiring.md](../hardware/wiring.md):
+   VL53L1X + SHT41 on I²C (D0 SDA / D1 SCL), relay on D7, battery divider on A0.
+3. Enclosure and glass window come later (they need calibration, step 7).
+4. Run [test/bench-test.md](../test/bench-test.md) in full before any deployment.
 
 ## 2. Firmware
 

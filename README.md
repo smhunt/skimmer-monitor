@@ -118,6 +118,7 @@ skimmer-monitor/
 │   └── schema.sql              Postgres schema
 ├── hardware/
 │   ├── BOM.md                  Bill of materials with Canadian suppliers
+│   ├── breadboard.md           Staged breadboard build with checkpoints
 │   ├── wiring.md               Pin assignments and wiring diagram
 │   └── enclosure.md            Mounting and weatherproofing guide
 ├── docs/
