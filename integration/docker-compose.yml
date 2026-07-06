@@ -1,0 +1,21 @@
+services:
+  iot-postgres:
+    image: postgres:16-alpine
+    container_name: iot-postgres
+    restart: unless-stopped
+    ports:
+      - "5442:5432" # registered in ~/.claude/PORTS.md under skimmer-monitor
+    environment:
+      POSTGRES_DB: iot
+      POSTGRES_USER: iot
+      POSTGRES_PASSWORD: ${IOT_PG_PASSWORD:?set in integration/.env}
+    volumes:
+      - iot-pgdata:/var/lib/postgresql/data
+    labels:
+      org.opencontainers.image.title: "IoT Postgres"
+      org.opencontainers.image.description: "Shared Postgres for skimmer monitor (and future IoT ingest)"
+      org.opencontainers.image.version: "1.0.0"
+      com.ecoworks.project: "skimmer-monitor"
+
+volumes:
+  iot-pgdata:

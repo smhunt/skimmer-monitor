@@ -42,7 +42,7 @@
 #define CONDENSATION_THRESHOLD  85.0        // % RH inside enclosure
 
 // --- MQTT ---
-#define MQTT_BROKER             "192.168.1.10"  // Change to your broker IP
+#define MQTT_BROKER             "10.10.10.24"   // Mosquitto (Docker) on Sean's MBP
 #define MQTT_PORT               1883
 
 #endif

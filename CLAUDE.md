@@ -87,4 +87,6 @@ Per Sean's preference, source from Canadian suppliers:
 - [x] Add Postgres ingestion script matching sump pump monitor pattern — `integration/src/ingest.ts` (2026-07-05)
 - [x] MCP server with skimmer tools — built standalone in `integration/src/mcp-server.ts` (sump pump MCP server lives on the cottage server, not this machine)
 - [ ] Field test rate-of-rise safety with valve disconnected
-- [ ] Deploy ingest bridge + apply schema.sql on the server hosting Mosquitto/Postgres (10.10.10.24)
+- [x] Deploy ingest bridge + schema — running under PM2 on this Mac (10.10.10.24 is the MBP); iot-postgres on port 5442 (2026-07-06)
+- [ ] `pm2 startup` (needs sudo) so ingest survives reboot
+- [ ] Set PARTICLE_TOKEN on the MCP server registration once device is claimed

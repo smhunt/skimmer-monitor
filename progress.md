@@ -113,6 +113,35 @@
 
 ---
 
+## 2026-07-06 — Ingest pipeline deployed; full stack verified
+
+**What changed**:
+- Discovered "the server" 10.10.10.24 is this MacBook Pro — deployment is local
+- Provisioned `iot-postgres` (postgres:16-alpine, port 5442, registered in PORTS.md)
+  via `integration/docker-compose.yml`; applied schema.sql
+- Ingest bridge running under PM2 (`skimmer-ingest`, pm2 save done) against the
+  existing Dockerized Mosquitto on 1883
+- Re-registered skimmer MCP server with live DATABASE_URL + PARTICLE_DEVICE
+- `config.h`: MQTT_BROKER → 10.10.10.24; firmware recompiled clean
+- Firmware fixes (earlier today): vendored libs into lib/ (all three
+  project.properties pins were stale/nonexistent), forward-declared mqttCallback
+
+**Tested**:
+- End-to-end: mosquitto_pub → ingest debounce → Postgres rows → MCP
+  `get_skimmer_level` returns the reading over stdio. Smoke rows truncated after.
+
+**Open issues**:
+- `PARTICLE_TOKEN` not set — `force_fill` inert until device is claimed
+  (`particle token create`, then re-add MCP server with the extra --env)
+- PM2 not registered as a launch daemon (`pm2 startup` needs sudo) — ingest won't
+  survive a reboot until run
+
+**Next**:
+- Order parts, breadboard prototype, bench test (Phase 2)
+- Flash firmware.bin over USB once hardware arrives
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title
