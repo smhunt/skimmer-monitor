@@ -53,6 +53,37 @@
 
 ---
 
+## 2026-07-06 — Phase 0 spike: Smart Skimmer AI vision
+
+**What changed**:
+- Started exploration branch `claude/smart-pool-skimmer-24324s` for an entirely new
+  AI-driven pool-health system that follows, tracks, records, and analyzes overall pool
+  health — not just water level.
+- Wrote `docs/smart-skimmer-ai-vision.md`: motivation, four health pillars (chemistry,
+  clarity, circulation, equipment/environment), a separate-power-domain sense-board
+  architecture (ESP32-S3 + ORP/pH/temp/TDS/turbidity), a draft MQTT/Postgres data
+  contract, an AI layer split between a deterministic analyzer service and Claude via
+  new MCP tools, and a phased plan (0→E).
+
+**Why**:
+- The skimmer sees 100% of circulated water, making it the ideal listening post for a
+  broader health mission. This is a design spike to decide *whether/how* to expand
+  without disturbing the safety-critical level + auto-fill firmware.
+
+**Tested**:
+- None — documentation-only exploration. No hardware spend, no firmware change.
+
+**Open issues**:
+- Probe placement (in-skimmer vs. inline return), probe calibration/drift detection,
+  pool-volume input for dose math, weather-API provider + network policy, automated
+  dosing deferred pending a separate safety review. See doc §8.
+
+**Next**:
+- Review/refine the vision, pick the second MCU, then Phase A sense-board bring-up
+  (after the current device clears bench test + deployment, Phases 2–5).
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title
