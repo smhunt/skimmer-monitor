@@ -18,6 +18,8 @@ SYSTEM_THREAD(ENABLED);
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
 // --- Hardware ---
+void mqttCallback(char* topic, byte* payload, unsigned int length);
+
 SFEVL53L1X tof;
 Adafruit_SHT31 sht = Adafruit_SHT31();
 MQTT mqtt(MQTT_BROKER, MQTT_PORT, mqttCallback);
