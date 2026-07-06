@@ -88,5 +88,5 @@ Per Sean's preference, source from Canadian suppliers:
 - [x] MCP server with skimmer tools — built standalone in `integration/src/mcp-server.ts` (sump pump MCP server lives on the cottage server, not this machine)
 - [ ] Field test rate-of-rise safety with valve disconnected
 - [x] Deploy ingest bridge + schema — running under PM2 on this Mac (10.10.10.24 is the MBP); iot-postgres on port 5442 (2026-07-06)
-- [ ] `pm2 startup` (needs sudo) so ingest survives reboot
+- [x] `pm2 startup` — launch daemon registered, ingest survives reboot (2026-07-06)
 - [ ] Set PARTICLE_TOKEN on the MCP server registration once device is claimed
