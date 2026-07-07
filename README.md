@@ -1,6 +1,8 @@
 # Skimmer Water Level Monitor
 
-Wireless in-skimmer water level monitor with auto-fill control for residential pools. Particle Photon 2 + VL53L1X time-of-flight sensor + SHT41 environmental sensor. Integrates with Particle Cloud, MQTT/Home Assistant, and any platform that can consume webhooks.
+Wireless in-skimmer water level monitor with auto-fill control for residential pools. Particle Photon + VL53L1X time-of-flight sensor + SHT41 environmental sensor. Integrates with Particle Cloud, MQTT/Home Assistant, and any platform that can consume webhooks.
+
+> **Target board:** the primary build target is the **original Particle Photon** (platform `photon`, Device OS 2.x LTS) — the hardware in current use. The **Photon 2** (platform `photon2`, Device OS 6.x) is also fully supported from the same source; the only real difference is the build command and the battery/power subsystem. See [Target board & platforms](#target-board--platforms).
 
 ## Features
 
@@ -23,22 +25,43 @@ Total cost: ~CAD $85.
 
 ## Building
 
-This project uses Particle Workbench + DeviceOS 5.x.
+This project builds with the Particle cloud compiler (or Particle Workbench).
+Libraries are vendored in `lib/` — no `particle library install` needed.
 
 ```bash
 # Install Particle CLI
 npm install -g particle-cli
 particle login
 
-# Dependencies are pinned in project.properties and resolved by the cloud compiler
-# (SparkFun_VL53L1X_Arduino_Library 1.2.9, adafruit-sht31 1.0.5, MQTT 0.5.6)
-
-# Compile and flash
-particle compile photon2 . --saveTo firmware.bin
+# Compile and flash — original Photon (primary target)
+particle compile photon . --saveTo firmware.bin
 particle flash <device-name> firmware.bin
+
+# Or build for the Photon 2 instead
+particle compile photon2 . --saveTo firmware-photon2.bin
 ```
 
-Or use Particle Workbench (VS Code extension) — recommended for development.
+The compile commands above produce `firmware.bin` (original Photon) and
+`firmware-photon2.bin` (Photon 2) locally — both are build artifacts
+(git-ignored), regenerate with the commands above. Or use Particle Workbench
+(VS Code extension) — recommended for development.
+
+### Target board & platforms
+
+Both boards run the same source unchanged. Pick your build target:
+
+| | Original Photon (`photon`) — **primary** | Photon 2 (`photon2`) |
+|---|---|---|
+| Device OS | 2.x LTS (2.3.1) | 6.x |
+| Build | `particle compile photon` | `particle compile photon2` |
+| I²C / relay / ADC pins | D0/D1, D7, A0 — identical | identical |
+| Battery / power | **No onboard LiPo charging or fuel gauge.** VIN is 3.6–5.5 V, so it **can't run directly off a single 18650.** Bench: power over USB. Battery deploy: boost-converter → VIN, or use the Photon 2. | Onboard JST LiPo connector + charging + fuel gauge; runs a single 18650 natively (TP4056 → LiPo pins). |
+| Sleep current | Higher — `ULTRA_LOW_POWER` works but draws more; expect shorter runtime than the 5-month figure below. | Lower; 5-month figure applies. |
+| Status | End-of-life (2.x LTS is maintenance-only), but fully functional. | Current product; better fit for the battery/solar deployment. |
+
+The battery/solar wiring in `hardware/wiring.md` and `hardware/breadboard.md`
+Stage 5 assumes the Photon 2's onboard charging. On the original Photon that
+stage differs — see the notes there.
 
 ## Configuration
 

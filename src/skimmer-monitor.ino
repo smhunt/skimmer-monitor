@@ -1,7 +1,7 @@
 /*
  * Skimmer Water Level Monitor
  *
- * Particle Photon 2 + VL53L1X ToF + SHT41
+ * Particle Photon (original; also builds for Photon 2) + VL53L1X ToF + SHT41
  * Pool skimmer water level monitoring with auto-fill control
  *
  * Author: EcoWorks Web Architecture Inc.

@@ -5,7 +5,7 @@ Run through this before installing the unit in your skimmer. Each check should p
 ## Powered Off Checks
 
 - [ ] All solder joints visually inspected (no cold joints, no bridges)
-- [ ] Continuity check from battery + to Photon 2 LiPo+
+- [ ] Continuity check from battery + to the board's power input (Photon 2: LiPo+; original Photon: boost converter → VIN)
 - [ ] No continuity between any power rail and GND (shorts check)
 - [ ] Relay output isolated from sensor power (multimeter)
 - [ ] I²C SDA/SCL pulled to 3.3V with 4.7kΩ resistors (most breakouts include these — verify)
@@ -14,7 +14,7 @@ Run through this before installing the unit in your skimmer. Each check should p
 
 Connect via USB, not battery, for initial bring-up.
 
-- [ ] Photon 2 enumerates as USB device
+- [ ] Photon enumerates as USB device
 - [ ] Onboard LED breathes cyan after ~30s (Wi-Fi connected)
 - [ ] `particle serial monitor` shows no fatal errors
 - [ ] No magic smoke 😄
@@ -65,11 +65,11 @@ mosquitto_sub -h <broker> -t "pool/skimmer/#" -v
 
 ## Battery & Sleep
 
-- [ ] Disconnect USB, run on battery alone
-- [ ] Photon 2 continues to wake on schedule
+- [ ] Disconnect USB, run on battery alone (Photon 2: LiPo; original Photon: 18650 → TP4056 → 5V boost → VIN)
+- [ ] Board continues to wake on schedule
 - [ ] Multimeter on battery line: <0.5 mA average over a full sleep cycle (use a USB power meter or similar)
-- [ ] Wake current spike <100 mA (typical 60-80 mA for Photon 2 + ToF)
-- [ ] Sleep current <200 µA (Photon 2 ULTRA_LOW_POWER)
+- [ ] Wake current spike <100 mA (typical 60-80 mA for MCU + ToF)
+- [ ] Sleep current: Photon 2 `ULTRA_LOW_POWER` <200 µA; **original Photon is higher** (stop-mode ~1 mA, plus boost-converter quiescent) — expect shorter runtime than the Photon 2 battery-life figures
 
 ## Solar Charging (if installed)
 

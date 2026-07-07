@@ -6,7 +6,8 @@ All prices CAD as of June 2026, Canadian suppliers prioritized.
 
 | Qty | Part | Supplier | Approx CAD |
 |-----|------|----------|-----------|
-| 1 | Particle Photon 2 | store.particle.io / BC Robotics | $25 |
+| 1 | Particle **Photon** (original, primary target) — reuse existing stock; discontinued so buy used/old stock. Or the in-production **Photon 2** as a drop-in alternative | store.particle.io (Photon 2) / BC Robotics | $25 |
+| 1 | 5V boost converter (e.g. MT3608) — **original Photon only**, for the 18650→VIN path (Photon 2 doesn't need it) | ABRA Electronics / BC Robotics | $4 |
 | 1 | SparkFun VL53L1X ToF breakout (SEN-14722) | BC Robotics / Solarbotics | $25 |
 | 1 | Adafruit SHT41 breakout (5776) | ABRA Electronics / BC Robotics | $10 |
 | 1 | 18650 protected Li-ion 3000mAh | Voltaic Systems / Battery Junction CA | $14 |

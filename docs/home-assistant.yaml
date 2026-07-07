@@ -14,7 +14,7 @@ mqtt:
           - skimmer_photon_01
         name: "Pool Skimmer Monitor"
         manufacturer: "EcoWorks"
-        model: "Photon 2"
+        model: "Particle Photon"
 
     - name: "Skimmer Temperature"
       unique_id: skimmer_temperature

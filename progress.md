@@ -142,6 +142,48 @@
 
 ---
 
+## 2026-07-07 — Original Photon (platform `photon`) is now the primary target
+
+**What changed**:
+- Made the **original Particle Photon** the primary build target / deployment
+  hardware "for now"; kept the Photon 2 (`photon2`) as a fully supported
+  alternative from the same source.
+- Verified the firmware compiles clean for `photon` (Device OS 2.3.1) — the
+  `SystemSleepConfiguration` sleep API dates to 1.5.0 so it's in-range; all three
+  vendored libs build. `Compile succeeded` (Flash 24876 / RAM 1648).
+- Binaries: `firmware.bin` rebuilt for `photon` (canonical); saved the prior
+  Photon 2 build as `firmware-photon2.bin`.
+- Docs/build flipped to lead with `particle compile photon`: README (new
+  "Target board & platforms" table), CLAUDE.md, docs/SETUP.md, docs/calibration.md,
+  docs/README.md, .ino header. Corrected stale lib versions in README/docs
+  (sht31 0.0.7, MQTT 0.4.32) while there.
+- Reworked the **power/battery** docs (wiring.md, breadboard.md Stage 5, BOM,
+  bench-test.md) — this is the one real hardware difference.
+
+**Why**:
+- Original Photon is the board on hand. Firmware is platform-neutral; only the
+  build command and power path differ.
+
+**Tested**:
+- `particle compile photon` succeeds. No firmware source changes were needed.
+- Not yet flashed to hardware.
+
+**Open issues / the real caveat**:
+- The original Photon has **no onboard LiPo charging/connector/fuel gauge** and
+  VIN needs ≥3.6 V, so it **can't run a single 18650 directly**. Bench = USB;
+  battery deploy needs a 5 V boost converter (18650 → TP4056 → boost → VIN), added
+  to the BOM. Sleep current is higher than the Photon 2, so battery life will be
+  shorter than the 5-month figure. For the outdoor battery/solar deployment the
+  Photon 2 remains the better fit — revisit before Phase 4.
+- Original Photon is EOL (2.x LTS is maintenance-only); fine for dev, sunset for
+  long-term production.
+
+**Next**:
+- Bench-test on the original Photon over USB (Phase 2), decide battery path
+  (boost-to-VIN on the Photon vs. switch to Photon 2) before deployment.
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title

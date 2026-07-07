@@ -1,15 +1,19 @@
 # Breadboard Build Guide
 
 Step-by-step bench prototype (Phase 2). No enclosure, no soldering beyond headers,
-USB power until the final stage. Each stage ends with a checkpoint — don't move on
+**USB power throughout**. Each stage ends with a checkpoint — don't move on
 until it passes. When the whole board works, hand off to
 [test/bench-test.md](../test/bench-test.md).
+
+> Written for the **original Particle Photon** (the primary board). Every pin
+> label below is identical on the **Photon 2** — the only board-specific step is
+> **Stage 5 (battery)**, which is called out there.
 
 ## What You Need at the Bench
 
 From [BOM.md](BOM.md):
 
-- Particle Photon 2 (headers soldered — see Stage 0)
+- Particle Photon (headers soldered — see Stage 0)
 - SparkFun VL53L1X breakout (SEN-14722)
 - Adafruit SHT41 breakout
 - Opto-isolated 5V relay module
@@ -25,7 +29,7 @@ Bench extras (not in the BOM):
 
 ## Stage 0 — Headers and Firmware Prep
 
-1. Solder male headers to the Photon 2, VL53L1X, and SHT41 (all three usually ship
+1. Solder male headers to the Photon, VL53L1X, and SHT41 (all three usually ship
    loose). Flux, one pin first, check alignment, then the rest.
 2. Before wiring anything, flash the firmware over USB so the board is known-good:
 
@@ -37,17 +41,17 @@ Bench extras (not in the BOM):
    Expect `tof-init-failed` and `sht-init-failed` events — that's correct with no
    sensors attached, and proves the firmware runs and reports.
 
-**✓ Checkpoint:** Photon 2 breathes cyan (Wi-Fi up), serial monitor shows the two
+**✓ Checkpoint:** Photon breathes cyan (Wi-Fi up), serial monitor shows the two
 init-failure messages and no crashes.
 
 ## Stage 1 — Power Rails
 
 ```
-Photon 2 3V3  ──► breadboard red (+) rail
-Photon 2 GND  ──► breadboard blue (–) rail
+Photon 3V3  ──► breadboard red (+) rail
+Photon GND  ──► breadboard blue (–) rail
 ```
 
-1. Seat the Photon 2 across the breadboard's center channel, USB connector
+1. Seat the Photon across the breadboard's center channel, USB connector
    overhanging the edge.
 2. Jumper 3V3 → + rail, GND → – rail. If your breadboard has split rails, bridge
    them so both sides are live.
@@ -60,8 +64,8 @@ Both sensors share the bus (VL53L1X @ 0x29, SHT41 @ 0x44 — no collision), and 
 breakouts include their own pull-up resistors, so no extra parts are needed.
 
 ```
-Photon 2 D0 (SDA) ──┬── VL53L1X SDA ──┬── SHT41 SDA
-Photon 2 D1 (SCL) ──┼── VL53L1X SCL ──┼── SHT41 SCL
+Photon D0 (SDA) ──┬── VL53L1X SDA ──┬── SHT41 SDA
+Photon D1 (SCL) ──┼── VL53L1X SCL ──┼── SHT41 SCL
         + rail    ──┼── VL53L1X VIN ──┼── SHT41 VIN
         – rail    ──┴── VL53L1X GND ──┴── SHT41 GND
 ```
@@ -72,7 +76,7 @@ Photon 2 D1 (SCL) ──┼── VL53L1X SCL ──┼── SHT41 SCL
 3. **Do not remove the protective film from the VL53L1X lens yet** — leave it until
    the checkpoint, peel it only once wiring is done (fingerprints on the lens skew
    readings more than the film does).
-4. Reset the Photon 2 and watch the serial monitor.
+4. Reset the Photon and watch the serial monitor.
 
 **✓ Checkpoint:** No init-failure events on boot. Within one wake cycle the serial
 log shows a distance reading and plausible temp/humidity (room temp ±2 °C). Point
@@ -103,7 +107,7 @@ it moves to the real battery +.
 ## Stage 4 — Relay Module (DRY — nothing connected to the contacts)
 
 ```
-Photon 2 D7 ──[10 kΩ]──► Relay IN
+Photon D7 ──[10 kΩ]──► Relay IN
 (optional: 100 kΩ from Relay IN to – rail, prevents chatter during boot)
 
 + rail ──► Relay VCC     (most opto-isolated modules work at 3.3 V)
@@ -113,7 +117,7 @@ Photon 2 D7 ──[10 kΩ]──► Relay IN
 Leave the relay's screw terminals (COM/NO/NC) **empty**. No valve, no load.
 
 If the relay doesn't click at 3.3 V logic, your module needs 5 V — either power
-VCC from the Photon 2's VUSB pin (5 V when on USB) keeping IN at 3.3 V logic
+VCC from the Photon's VIN pin (~5 V when on USB) keeping IN at 3.3 V logic
 (works for opto-isolated inputs), or swap modules per
 [wiring.md](wiring.md#relay-wiring).
 
@@ -129,26 +133,36 @@ the firmware must abort on its own and publish `skimmer/alert` = `no-rise-aborti
 **This is the single most important test on the bench — it's the stuck-valve
 safety.** Watch it happen at least twice.
 
-## Stage 5 — Battery Power (optional on the breadboard)
+## Stage 5 — Battery Power
 
-Can be deferred to final assembly, but doing it on the bench catches TP4056 issues
-early. This stage needs three solder joints.
+> **Board-specific — this is the only stage that differs between boards.**
+> The original Photon has **no onboard LiPo charging** and VIN needs ≥3.6 V, so
+> a single 18650 can't drive it directly. The Photon 2 can.
+
+**On the original Photon (primary target):** stay on **USB for all bench work** —
+skip battery on the breadboard. The battery path needs a 5 V boost converter
+(18650 → TP4056 → boost → VIN) and is a final-assembly concern, not a bench one.
+You can still test the divider/`battery_v` reading using the 3V3-rail stand-in
+from Stage 3. When you build the deployment power path, see
+[wiring.md → Power Input](wiring.md#power-input).
+
+**On the Photon 2:** you can wire the battery on the bench now (three solder joints):
 
 1. Solder 18650 holder leads to TP4056 **B+ / B–** (battery side — not OUT).
 2. TP4056 **OUT+ / OUT–** → Photon 2 **LiPo+ / LiPo–** (JST connector or pins).
 3. Move the divider's top leg from the + rail to **OUT+** (real battery voltage).
 4. Insert the (charged) 18650, unplug USB.
 
-**✓ Checkpoint:** Photon 2 boots and connects on battery alone. `battery_v` now
-reads actual cell voltage (3.6–4.2 V). Plug USB into the TP4056 input: its charge
-LED lights. Solar panel input waits for final assembly ([wiring.md](wiring.md#solar-charging)).
+**✓ Checkpoint (Photon 2):** boots and connects on battery alone; `battery_v`
+reads actual cell voltage (3.6–4.2 V); plugging USB into the TP4056 lights its
+charge LED. Solar input waits for final assembly ([wiring.md](wiring.md#solar-charging)).
 
 ## Bench Layout Reference
 
 ```
         USB ↓
  ┌───────────────────────────────────────────┐
- │  [Photon 2]   [VL53L1X]   [SHT41]         │  ← breakouts on the board
+ │  [Photon]   [VL53L1X]   [SHT41]         │  ← breakouts on the board
  │   D0 D1 D7 A0   (bus)      (bus)          │
  │  ═════════ + rail ════════════════════    │
  │  ═════════ – rail ════════════════════    │

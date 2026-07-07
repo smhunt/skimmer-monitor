@@ -33,7 +33,7 @@ The ToF needs a clear optical path. Use 1mm borosilicate glass (not acrylic — 
 │  Antenna pigtail through gland  │
 │                                 │
 │   ┌──────────┐    ┌─────────┐  │
-│   │ Photon 2 │    │ TP4056  │  │
+│   │  Photon  │    │ TP4056  │  │
 │   └─────┬────┘    └────┬────┘  │
 │         │              │       │
 │   ┌─────┴──────┐  ┌────┴────┐  │
@@ -74,7 +74,7 @@ The skimmer is a Faraday-cage-ish environment surrounded by water-saturated conc
 2. **Antenna mounted to underside of skimmer lid, just above water line** — works if you have line-of-sight to an indoor AP within ~5m
 3. **Onboard PCB antenna** (fallback) — works for some installations but YMMV
 
-Run a Wi-Fi signal test before sealing everything up. The Photon 2's `WiFi.RSSI()` should report better than -75 dBm consistently. If it drops below -85, the connection becomes unreliable.
+Run a Wi-Fi signal test before sealing everything up. The Photon's `WiFi.RSSI()` should report better than -75 dBm consistently. If it drops below -85, the connection becomes unreliable.
 
 ## Mounting the Sensor PCB
 

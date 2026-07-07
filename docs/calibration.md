@@ -6,7 +6,7 @@ Run this after final assembly with the glass window installed. The window adds a
 
 - Tape measure (mm-graduated)
 - Tape or marker to denote water levels on skimmer wall
-- USB cable to Photon 2 (for serial monitor)
+- USB cable to the Photon (for serial monitor)
 - Optional: container that fits inside skimmer for controlled-level testing
 
 ## Step 1: Empty Skimmer Baseline
@@ -81,7 +81,7 @@ Update `src/config.h`:
 Reflash:
 
 ```bash
-particle compile photon2 . --saveTo firmware.bin
+particle compile photon . --saveTo firmware.bin   # or `photon2` for the Photon 2
 particle flash <device-name> firmware.bin
 ```
 

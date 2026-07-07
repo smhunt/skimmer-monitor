@@ -34,8 +34,9 @@ particle wifi add                     # provision WiFi credentials
 # Configure
 $EDITOR src/config.h                  # at minimum: MQTT_BROKER, SKIMMER_DEPTH_MM
 
-# Compile (cloud compiler resolves deps from project.properties) and flash
-particle compile photon2 . --saveTo firmware.bin
+# Compile (libraries are vendored in lib/) and flash.
+# Primary target is the original Photon; swap `photon` → `photon2` for the Photon 2.
+particle compile photon . --saveTo firmware.bin
 particle flash --usb firmware.bin     # or OTA: particle flash skimmer-monitor firmware.bin
 ```
 

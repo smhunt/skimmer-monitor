@@ -9,7 +9,7 @@ installation, see [SETUP.md](SETUP.md).
 ```
  ┌─────────────────────────── Pool skimmer ───────────────────────────┐
  │  ┌──────────────────────────────────────────────────────────────┐  │
- │  │  Photon 2 ── I²C ── VL53L1X (ToF, through glass window)      │  │
+ │  │  Photon  ── I²C ── VL53L1X (ToF, through glass window)      │  │
  │  │     │       I²C ── SHT41 (enclosure temp/humidity)           │  │
  │  │     │       A0  ── battery divider (18650 + solar)           │  │
  │  │     └────── D7  ── relay ──► fill valve (hose bib)           │  │
@@ -40,11 +40,11 @@ sleeps. `retained` variables preserve fill counters across sleep cycles.
 
 | Layer | Technology |
 |-------|-----------|
-| MCU | Particle Photon 2, DeviceOS 5.x, `SYSTEM_MODE(SEMI_AUTOMATIC)` + threading |
+| MCU | Original Particle Photon (Device OS 2.x LTS) — primary; also builds for Photon 2 (Device OS 6.x). `SYSTEM_MODE(SEMI_AUTOMATIC)` + threading |
 | Level sensing | VL53L1X time-of-flight (SparkFun_VL53L1X_Arduino_Library 1.2.9), 7-sample median |
-| Environment | SHT41 (adafruit-sht31 1.0.5) — condensation early warning |
-| Power | 18650 Li-ion + 2W solar, 2:1 divider on A0 |
-| Transport | Particle Cloud (TLS) + MQTT 0.5.6 → Mosquitto |
+| Environment | SHT41 (adafruit-sht31 0.0.7) — condensation early warning |
+| Power | 18650 Li-ion + 2W solar, 2:1 divider on A0 (see README for the original-Photon power caveat) |
+| Transport | Particle Cloud (TLS) + MQTT 0.4.32 → Mosquitto |
 | Storage | Postgres (`skimmer_readings`, `skimmer_events`) |
 | Ingestion | TypeScript bridge (`integration/src/ingest.ts`), mqtt + pg, PM2 |
 | AI access | MCP server over stdio (`integration/src/mcp-server.ts`), @modelcontextprotocol/sdk |

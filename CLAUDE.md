@@ -2,7 +2,9 @@
 
 ## Project: Skimmer Water Level Monitor
 
-Wireless in-skimmer water level monitor with auto-fill control. Particle Photon 2 firmware that integrates with the existing EcoWorks pool monitoring ecosystem.
+Wireless in-skimmer water level monitor with auto-fill control. Particle firmware that integrates with the existing EcoWorks pool monitoring ecosystem.
+
+**Primary target board: the original Particle Photon** (platform `photon`, Device OS 2.x LTS) — the hardware in current use. The Photon 2 (`photon2`, Device OS 6.x) builds from the same source and is kept as a supported alternative. The source is platform-neutral; only the build command and the battery/power wiring differ (the original Photon has no onboard LiPo charging — see README "Target board & platforms"). Prebuilt: `firmware.bin` = original Photon, `firmware-photon2.bin` = Photon 2.
 
 ## Related Projects
 
@@ -12,7 +14,7 @@ Wireless in-skimmer water level monitor with auto-fill control. Particle Photon 
 
 ## Tech Stack
 
-- Hardware: Particle Photon 2, VL53L1X ToF, SHT41, 18650 Li-ion + solar
+- Hardware: original Particle Photon (primary; Photon 2 also supported), VL53L1X ToF, SHT41, 18650 Li-ion + solar
 - Firmware: C++ on DeviceOS 5.x via Particle Workbench
 - Integration: Particle Cloud, MQTT (Mosquitto), Home Assistant
 - Optional: TypeScript bridge to existing Postgres + MCP server for Claude queries
@@ -49,8 +51,8 @@ Follow @prompt_plan.md and @progress.md conventions:
 ## Build & Test
 
 ```bash
-# Compile
-particle compile photon2 . --saveTo firmware.bin
+# Compile — original Photon (primary target); use `photon2` for the Photon 2
+particle compile photon . --saveTo firmware.bin
 
 # Flash over USB
 particle flash --usb firmware.bin
@@ -67,10 +69,10 @@ particle subscribe skimmer mine
 
 ## Hardware Notes
 
-- I²C bus: D0 (SDA), D1 (SCL) on Photon 2
+- I²C bus: D0 (SDA), D1 (SCL) — same pins on the original Photon and Photon 2
 - Relay output: D7
 - Battery monitor: A0 with 2:1 voltage divider
-- 3.3V supply from Photon 2 onboard regulator (sufficient for ToF + SHT41)
+- 3.3V supply from the Photon's onboard regulator (sufficient for ToF + SHT41)
 - External 2.4 GHz antenna recommended for in-skimmer mounting
 
 ## Canadian Sourcing
@@ -90,3 +92,5 @@ Per Sean's preference, source from Canadian suppliers:
 - [x] Deploy ingest bridge + schema — running under PM2 on this Mac (10.10.10.24 is the MBP); iot-postgres on port 5442 (2026-07-06)
 - [x] `pm2 startup` — launch daemon registered, ingest survives reboot (2026-07-06)
 - [ ] Set PARTICLE_TOKEN on the MCP server registration once device is claimed
+- [x] Primary target board = original Photon (`particle compile photon`, Device OS 2.3.1); Photon 2 kept as supported alternative. Firmware compiles clean for both, no source change (2026-07-07)
+- [ ] **Battery path for the original Photon**: no onboard LiPo charging + VIN ≥3.6 V means it can't run a single 18650 directly — needs a 5 V boost converter (18650 → TP4056 → boost → VIN). Bench runs on USB. Decide boost-to-VIN vs. switch to Photon 2 before Phase 4 deployment
