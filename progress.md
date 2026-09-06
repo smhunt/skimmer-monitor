@@ -184,6 +184,44 @@
 
 ---
 
+## 2026-09-06 — Health system kickoff: pool-first (spa deferred to add-on)
+
+**What changed**:
+- **Decision recorded**: build the AI-health system **pool-first**, add the **spa** as a later
+  front-end. Reverses the earlier spa-first lean — the market analysis stands, only the
+  sequencing is settled.
+- Wrote `docs/pool-health-build-plan.md`: the kickoff doc of record — decision rationale,
+  current-state table, pool-scoped phases `PH-0…PH-5`, critical path, immediate next actions,
+  and the spa add-on sequenced after PH-4. Supersedes vision-doc §7 for sequencing.
+- First concrete engineering step (PH-1, hardware-independent): added the `chem_readings`
+  table + index to `integration/schema.sql` — additive/idempotent, doesn't touch the live
+  level/fill pipeline; health/chem events reuse `skimmer_events`.
+- Reconciled the docs to the decision: vision-doc §8 open question marked resolved and §9
+  "Recommendation" → "Decision"; spa doc reframed from "spa-first" to "planned later add-on".
+
+**Why**:
+- Shortest path to a working system is the hardware already in hand — the pool device compiles
+  and its MQTT→Postgres→MCP pipeline is already deployed, so the health system extends a live
+  stack and ships with chlorine-only dose math. Spa (bromine + new front-end) rides the same
+  brain next.
+
+**Tested**:
+- None run this change. Schema addition is additive DDL (`CREATE TABLE/INDEX IF NOT EXISTS`);
+  no TS or firmware touched, so `tsc` and the build are unaffected. Apply with
+  `psql "$DATABASE_URL" -f integration/schema.sql` (idempotent) when convenient.
+
+**Open issues**:
+- Pool probe placement (in-skimmer battery vs. inline-return mains) gates PH-2 mechanicals.
+- Pool-volume input for dose math; weather-API provider + network policy; confirm ESP32-S3
+  as the sense-board MCU before ordering PH-2 parts.
+
+**Next**:
+- Finish PH-1 against the live pipeline: document `pool/skimmer/chem/*` in
+  `docs/mqtt-schema.md`, extend the ingest bridge to subscribe + upsert `chem_readings`, add a
+  `get_chem_history` MCP tool. Then order PH-2 bench parts.
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title

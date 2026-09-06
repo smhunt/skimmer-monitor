@@ -1,10 +1,15 @@
 # Spa / Hot Tub Health Monitor — Companion Design
 
-> **Status:** Exploratory, spa-first companion to
-> [`smart-skimmer-ai-vision.md`](smart-skimmer-ai-vision.md). Fleshes out the §9 argument
-> that hot tubs may be the stronger wedge: a concrete sensing front-end, bromine-aware
-> dose math, and the floating-vs-inline placement decision. Shares the analyzer / MQTT /
-> Postgres / MCP "brain" from the vision doc — only the front-end and sanitizer math differ.
+> **Status:** Spec for the **spa front-end — a planned later add-on.** Sequencing was
+> decided 2026-09-06: **pool-first, spa second** (see
+> [`pool-health-build-plan.md`](pool-health-build-plan.md)). This doc stays the design of
+> record for the spa variant and is picked up once the pool build proves the shared brain;
+> the §9 case for spa being a strong market is unchanged — only the *order* is settled.
+>
+> Companion to [`smart-skimmer-ai-vision.md`](smart-skimmer-ai-vision.md): a concrete sensing
+> front-end, bromine-aware dose math, and the floating-vs-inline placement decision. Shares the
+> analyzer / MQTT / Postgres / MCP "brain" from the vision doc — only the front-end and
+> sanitizer math differ.
 >
 > Created 2026-07-06 on branch `claude/smart-pool-skimmer-24324s`. No hardware spend yet.
 
@@ -16,9 +21,10 @@ continuously reads sanitizer, pH, temperature, TDS, and clarity, publishes to th
 one bromine tab — you'll be balanced in 30 minutes"* instead of making them dip test strips
 twice a day.
 
-## 2. Why Spa-First (recap)
+## 2. Why Spa Is a Strong Second Front-End (recap)
 
-Full argument in `smart-skimmer-ai-vision.md` §9. The load-bearing points:
+Full argument in `smart-skimmer-ai-vision.md` §9. Pool ships first (hardware in hand), but the
+spa case is what makes it the planned next front-end. The load-bearing points:
 
 - Small volume (~1,500 L) + high temp (38 °C) ⇒ chemistry swings fast ⇒ continuous
   monitoring is *needed*, not just nice.
