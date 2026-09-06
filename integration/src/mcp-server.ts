@@ -1,13 +1,14 @@
 /**
  * Skimmer MCP server (stdio transport)
  *
- * Exposes the skimmer monitor to Claude via four tools backed by the shared
+ * Exposes the skimmer monitor to Claude via five tools backed by the shared
  * Postgres instance and the Particle Cloud API:
  *
  *   get_skimmer_level      — latest sensor snapshot
  *   get_fill_history       — fill cycles over the last N days
  *   force_fill             — request a manual fill (or stop) via Particle Cloud
  *   get_evaporation_rate   — average daily water loss excluding fill days
+ *   get_chem_history       — chemistry (ORP/pH/temp/TDS/turbidity) trends, hourly
  *
  * Register with Claude Code:
  *   claude mcp add skimmer -- npx tsx /path/to/integration/src/mcp-server.ts
@@ -148,6 +149,53 @@ server.registerTool(
       fill_days_excluded: fillDaySet.size,
       avg_evaporation_mm_per_day: avg,
       daily_drops: cleanDays,
+    });
+  },
+);
+
+server.registerTool(
+  "get_chem_history",
+  {
+    description:
+      "Pool water-chemistry trends over the last N days: ORP (mV), pH, water temperature, " +
+      "TDS (ppm), and turbidity (NTU), averaged per hour, plus the latest snapshot. Empty " +
+      "until the chemistry sense board (PH-2) is publishing pool/skimmer/chem/*.",
+    inputSchema: { days: z.number().int().min(1).max(90).default(7) },
+  },
+  async ({ days }) => {
+    const { rows: latest } = await db.query(
+      `SELECT ts, orp_mv, ph, water_temp_c, tds_ppm, turbidity_ntu, flow
+       FROM chem_readings ORDER BY ts DESC LIMIT 1`,
+    );
+    if (latest.length === 0) {
+      return textResult({
+        error: "no chemistry readings recorded yet — chem sense board (PH-2) not yet publishing",
+      });
+    }
+
+    const { rows: hourly } = await db.query(
+      `SELECT date_trunc('hour', ts) AS hour,
+              round(avg(orp_mv)::numeric, 1)::float8        AS orp_mv,
+              round(avg(ph)::numeric, 2)::float8            AS ph,
+              round(avg(water_temp_c)::numeric, 1)::float8  AS water_temp_c,
+              round(avg(tds_ppm)::numeric, 0)::float8       AS tds_ppm,
+              round(avg(turbidity_ntu)::numeric, 2)::float8 AS turbidity_ntu,
+              bool_or(flow)                                 AS flow_any,
+              count(*)::int                                 AS samples
+       FROM chem_readings
+       WHERE ts > now() - make_interval(days => $1)
+       GROUP BY 1 ORDER BY 1 ASC`,
+      [days],
+    );
+
+    const sampleCount = hourly.reduce((s, r) => s + r.samples, 0);
+    const ageMinutes = Math.round((Date.now() - new Date(latest[0].ts).getTime()) / 60000);
+
+    return textResult({
+      days,
+      sample_count: sampleCount,
+      latest: { ...latest[0], reading_age_minutes: ageMinutes },
+      hourly,
     });
   },
 );

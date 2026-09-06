@@ -11,6 +11,22 @@
 | `pool/skimmer/fills_today` | int | Every wake | Daily fill count |
 | `pool/skimmer/total_fills` | int | Every wake | Lifetime fill count |
 
+### Chemistry topics (pool-health expansion, PH-1)
+
+Published by the chemistry sense board once bench-ready (PH-2); see
+`docs/pool-health-build-plan.md`. MQTT `+` matches a single level, so
+`pool/skimmer/+` does **not** catch these — the ingest bridge subscribes
+`pool/skimmer/chem/+` separately and writes them to `chem_readings`.
+
+| Topic | Payload | Frequency | Description |
+|-------|---------|-----------|-------------|
+| `pool/skimmer/chem/orp` | float (mV) | ~60 s while circulating | Oxidation-reduction potential (sanitizer proxy) |
+| `pool/skimmer/chem/ph` | float | ~60 s | pH |
+| `pool/skimmer/chem/water_temp` | float (°C) | ~60 s | Pool water temperature |
+| `pool/skimmer/chem/tds` | float (ppm) | ~5 min | Total dissolved solids / salinity |
+| `pool/skimmer/chem/turbidity` | float (NTU) | ~5 min | Clarity (nephelometric) |
+| `pool/skimmer/chem/flow` | bool | on change | Circulation flow present |
+
 ## Particle Cloud Events (device → cloud)
 
 | Event | Payload | Trigger |
@@ -20,6 +36,12 @@
 | `skimmer/alert` | string | Anomaly detected (see below) |
 | `skimmer/calibrate` | string | Calibration function called |
 | `skimmer/error` | string | Sensor init failure |
+| `skimmer/health` | JSON | Analyzer health score + top recommendation (pool-health) |
+| `skimmer/chem-alert` | string | Chemistry out of band (e.g. pH < 7.2, ORP < 650 mV) |
+| `skimmer/clarity-alert` | string | Turbidity rising toward algae threshold |
+
+The three pool-health events reuse the `skimmer_events` table (categories
+`health` / `chem-alert` / `clarity-alert`) — no new events table.
 
 ### Alert payloads
 
@@ -56,6 +78,16 @@ pool/skimmer/fills_today   1
 pool/skimmer/total_fills   47
 ```
 
+### Chemistry raw payloads (one value per topic):
+```
+pool/skimmer/chem/orp         712
+pool/skimmer/chem/ph          7.4
+pool/skimmer/chem/water_temp  26.1
+pool/skimmer/chem/tds         340
+pool/skimmer/chem/turbidity   0.8
+pool/skimmer/chem/flow        true
+```
+
 ## Retention Policy Recommendations
 
 In your Mosquitto config or HA MQTT settings:
@@ -89,5 +121,9 @@ CREATE TABLE skimmer_events (
 CREATE INDEX skimmer_readings_ts ON skimmer_readings (ts DESC);
 CREATE INDEX skimmer_events_cat_ts ON skimmer_events (category, ts DESC);
 ```
+
+The pool-health expansion adds a `chem_readings` table alongside these. For the
+authoritative, current schema (including `chem_readings`) apply
+`integration/schema.sql` rather than the snippet above.
 
 See `integration/src/ingest.ts` for a TypeScript MQTT-to-Postgres bridge that matches the sump pump monitor pattern, and `integration/README.md` for setup. The same package provides an MCP server (`integration/src/mcp-server.ts`) exposing skimmer tools to Claude.
