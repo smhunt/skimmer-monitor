@@ -57,12 +57,13 @@ Numbered `PH-*` to avoid collision with the base device's Phases 1–6 in `promp
 
 ### PH-1 — Data contract & storage  ← **start now, in parallel with base-device bench test**
 Pure software; no hardware, no firmware. Get the pipeline ready to record chemistry.
-- [x] `chem_readings` table in `schema.sql` (this change)
-- [ ] Document `pool/skimmer/chem/*` topics in `docs/mqtt-schema.md`
-- [ ] Extend the ingest bridge to subscribe `pool/skimmer/chem/+` and upsert `chem_readings`
-- [ ] Extend MCP with a read-only `get_chem_history(days)` against the new table
-- **Exit:** `mosquitto_pub` of a synthetic chem reading lands a `chem_readings` row and is
-  visible through the MCP tool. No sensors required.
+- [x] `chem_readings` table in `schema.sql`
+- [x] Document `pool/skimmer/chem/*` topics in `docs/mqtt-schema.md`
+- [x] Extend the ingest bridge to subscribe `pool/skimmer/chem/+` and upsert `chem_readings`
+- [x] Extend MCP with a read-only `get_chem_history(days)` against the new table
+- [ ] **Live exit test** (needs the broker/DB on 10.10.10.24): `mosquitto_pub` of a synthetic
+  chem reading lands a `chem_readings` row and is visible through the MCP tool.
+- **Exit:** the live test above passes. Software side complete; only the round-trip remains.
 
 ### PH-2 — Chemistry sense board bring-up  (hardware)
 The make-or-break signal-quality phase.
@@ -74,15 +75,18 @@ The make-or-break signal-quality phase.
 - **Exit:** ORP/pH/temp read stable and track reference solutions within tolerance; readings
   land in `chem_readings` end-to-end.
 
-### PH-3 — Analyzer service  (software, deterministic)
+### PH-3 — Analyzer service  (software, deterministic)  ← **core started**
 The math that must **not** live in an LLM.
-- Rolling baselines + >2σ anomaly flags (generalize `prompt_plan.md` Phase 6 to every signal).
-- Langelier Saturation Index (pH, temp, TDS, alkalinity) → scale/corrosion risk.
-- **Chlorine** dose calculator (pool volume × current-vs-target); unit-checked, clamped, advisory.
-- Evaporation-vs-leak separation (correlate draw-down with weather + temperature).
-- Emits `skimmer/health` and `skimmer/chem-alert` (into `skimmer_events`).
-- **Exit:** unit tests green; alerts fire on injected out-of-band data; dose math matches
-  hand calculation.
+- [x] **Chemistry core** — `integration/src/analyzer/chemistry.ts`: Langelier Saturation Index
+  (pH, temp, TDS, hardness, alkalinity → corrosive/balanced/scaling), chlorine dose calculator,
+  and pH-adjustment estimate. All pure, unit-checked, clamped to a single conservative
+  correction, advisory-only. **12 unit tests green** (`npm test`).
+- [ ] Rolling baselines + >2σ anomaly flags (generalize `prompt_plan.md` Phase 6 to every signal).
+- [ ] Evaporation-vs-leak separation (correlate draw-down with weather + temperature).
+- [ ] Service wiring: subscribe chem readings, compute, emit `skimmer/health` and
+  `skimmer/chem-alert` (into `skimmer_events`). Needs live signals (after PH-2).
+- **Exit:** unit tests green (done for the core); alerts fire on injected out-of-band data;
+  dose math matches hand calculation (verified in tests).
 
 ### PH-4 — AI layer  (MCP + Claude)
 - New MCP tools: `get_pool_health`, `diagnose(symptom)`, `recommend_dose`, `weekly_report`

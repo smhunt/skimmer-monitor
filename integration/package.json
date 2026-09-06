@@ -8,6 +8,8 @@
     "build": "tsc",
     "ingest": "tsx src/ingest.ts",
     "mcp": "tsx src/mcp-server.ts",
+    "test": "node --import tsx --test 'src/**/*.test.ts'",
+    "typecheck": "tsc --noEmit",
     "db:init": "psql \"$DATABASE_URL\" -f schema.sql"
   },
   "dependencies": {

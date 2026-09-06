@@ -260,6 +260,41 @@
 
 ---
 
+## 2026-09-06 — PH-3 chemistry core (deterministic math + tests)
+
+**What changed**:
+- `integration/src/analyzer/chemistry.ts` — the deterministic pool-chemistry core, the
+  "numbers, never the LLM" layer:
+  - `langelierSaturationIndex()` → LSI + corrosive/balanced/scaling classification
+  - `chlorineDoseGrams()` → grams of dry product to hit target FC, clamped to a single
+    conservative raise (won't dose down; refuses oversized corrections)
+  - `phAdjustGrams()` → dry-acid / soda-ash estimate, clamped, flagged as re-test-required
+- `integration/src/analyzer/chemistry.test.ts` — 12 node:test cases (balanced/corrosive/
+  scaling LSI, dose + clamp + at-target + bad-product, pH raise/lower/clamp/on-target).
+- `package.json` — added `test` (`node --import tsx --test`) and `typecheck` scripts.
+- Docs: build-plan PH-3 core marked done (+ PH-1 items checked off, live exit test remains);
+  CHANGELOG, integration/README updated.
+
+**Why**:
+- PH-3 groundwork that needs no hardware. Dose math must be auditable and pure — Claude will
+  only *explain* what these return (recommend_dose, PH-4), never invent a dose.
+
+**Tested**:
+- `npm test` → 12/12 pass. `npx tsc --noEmit` clean. Dose/LSI outputs checked against hand
+  calculation in the tests.
+
+**Open issues**:
+- Chlorine-only (pool). Bromine/biguanide modes belong to the spa add-on.
+- pH dosing assumes nominal alkalinity — it's an estimate, clamped and marked re-test.
+- Remaining PH-3: rolling baselines / >2σ anomaly flags, evap-vs-leak, and the service wiring
+  that emits `skimmer/health` — those need live signals (post-PH-2).
+
+**Next**:
+- PH-1 live exit test on 10.10.10.24. Then PH-2 parts order. Baselines/anomaly detection can
+  also proceed on the level data that already exists (generalizes Phase 6).
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title
