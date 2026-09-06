@@ -13,8 +13,9 @@ psql "$DATABASE_URL" -f schema.sql
 
 ## Ingestion bridge
 
-Subscribes to `pool/skimmer/+` (readings) and `skimmer/+` (events), assembles
-multi-topic readings into single rows, and writes to `skimmer_readings` /
+Subscribes to `pool/skimmer/+` (readings), `pool/skimmer/chem/+` (chemistry —
+pool-health expansion), and `skimmer/+` (events), assembles multi-topic readings
+into single rows, and writes to `skimmer_readings` / `chem_readings` /
 `skimmer_events`.
 
 ```bash
@@ -32,6 +33,7 @@ Exposes the skimmer to Claude over stdio:
 | `get_fill_history(days)` | Fill cycles with durations, plus alerts |
 | `force_fill(action)` | Start/stop fill via Particle Cloud (firmware interlocks stay authoritative) |
 | `get_evaporation_rate(days)` | Avg daily water loss, fill days excluded |
+| `get_chem_history(days)` | Hourly ORP/pH/temp/TDS/turbidity trends + latest snapshot (empty until PH-2) |
 
 Register with Claude Code:
 

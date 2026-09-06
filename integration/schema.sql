@@ -19,3 +19,23 @@ CREATE TABLE IF NOT EXISTS skimmer_events (
 
 CREATE INDEX IF NOT EXISTS skimmer_readings_ts ON skimmer_readings (ts DESC);
 CREATE INDEX IF NOT EXISTS skimmer_events_cat_ts ON skimmer_events (category, ts DESC);
+
+-- --------------------------------------------------------------------------
+-- Pool-health expansion (PH-1 data contract). See docs/pool-health-build-plan.md.
+-- Additive and idempotent: the level + auto-fill pipeline above is unaffected.
+-- Populated by the ingest bridge from pool/skimmer/chem/* once the chemistry
+-- sense board (PH-2) is publishing; empty until then.
+-- Health/chemistry events ('health', 'chem-alert', 'clarity-alert') reuse the
+-- existing skimmer_events table — no new events table needed.
+-- --------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS chem_readings (
+  ts            TIMESTAMPTZ PRIMARY KEY DEFAULT now(),
+  orp_mv        REAL,
+  ph            REAL,
+  water_temp_c  REAL,
+  tds_ppm       REAL,
+  turbidity_ntu REAL,
+  flow          BOOLEAN
+);
+
+CREATE INDEX IF NOT EXISTS chem_readings_ts ON chem_readings (ts DESC);

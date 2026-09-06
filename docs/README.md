@@ -45,7 +45,7 @@ sleeps. `retained` variables preserve fill counters across sleep cycles.
 | Environment | SHT41 (adafruit-sht31 0.0.7) — condensation early warning |
 | Power | 18650 Li-ion + 2W solar, 2:1 divider on A0 (see README for the original-Photon power caveat) |
 | Transport | Particle Cloud (TLS) + MQTT 0.4.32 → Mosquitto |
-| Storage | Postgres (`skimmer_readings`, `skimmer_events`) |
+| Storage | Postgres (`skimmer_readings`, `skimmer_events`, `chem_readings`) |
 | Ingestion | TypeScript bridge (`integration/src/ingest.ts`), mqtt + pg, PM2 |
 | AI access | MCP server over stdio (`integration/src/mcp-server.ts`), @modelcontextprotocol/sdk |
 | Dashboards | Home Assistant (MQTT discovery), pool dashboard at 10.10.10.24:3025 |
@@ -59,7 +59,7 @@ skimmer-monitor/
 │   └── config.h                All tunables — no magic numbers in main code
 ├── integration/
 │   ├── src/ingest.ts           MQTT → Postgres bridge (long-lived, PM2)
-│   ├── src/mcp-server.ts       MCP server: 4 skimmer tools for Claude
+│   ├── src/mcp-server.ts       MCP server: 5 skimmer tools for Claude
 │   ├── src/particle.ts         Particle Cloud function caller
 │   ├── src/db.ts               Shared pg pool
 │   └── schema.sql              Postgres DDL

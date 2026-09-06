@@ -193,8 +193,10 @@ displace Phases 2–5 in `prompt_plan.md`.
   noise? Revisit after Phase C data exists.
 - **Automated dosing:** deliberately deferred. Chemical injection has a worse failure mode
   than the water valve. Requires its own interlock design and review.
-- **Target market — pool vs. spa (or both):** hot tub / spa health may be the stronger,
-  easier-to-win wedge (see §9). Decide sequencing before committing hardware.
+- **Target market — pool vs. spa (or both):** ~~hot tub / spa health may be the stronger,
+  easier-to-win wedge (see §9).~~ **Resolved 2026-09-06 — pool-first, spa as a later add-on**
+  (see [`pool-health-build-plan.md`](pool-health-build-plan.md)). The §9 analysis stands; the
+  spa is sequenced second, not dropped.
 
 ## 9. Adjacent Market: Hot Tub / Spa Health
 
@@ -242,16 +244,20 @@ pool-first roadmap.
   falls away. That makes a spa product a **cleaner, more self-contained build**: it *is*
   the "entirely new system," without a legacy safety envelope wrapped around it.
 
-### Recommendation
+### Recommendation → Decision (2026-09-06): pool-first, spa second
 
-Treat **spa health as a parallel target, not a detour.** The analyzer service, MQTT/Postgres
-contract, and MCP/Claude AI layer (§5–6) are shared across both; only the sensing front-end
-and the chlorine-vs-bromine dose math diverge. A sensible sequencing question for Sean:
-**lead with spa** (self-contained, year-round, mains-powered, chemistry-first) and let the
-pool integration reuse the same analyzer — or keep pool-first because the hardware already
-exists. This belongs on the Phase-0 decision list alongside the second-MCU choice.
+The analysis above holds: the analyzer service, MQTT/Postgres contract, and MCP/Claude AI
+layer (§5–6) are shared across both markets; only the sensing front-end and the
+chlorine-vs-bromine dose math diverge — so spa is a strong, arguably larger wedge.
 
-> Fleshed out in the spa-first companion doc:
+**The sequencing call has been made: build pool-first, add spa as a later front-end.** The
+deciding factor is time-to-first-working-system — the pool hardware exists and its pipeline is
+already deployed, so the health system extends a live stack rather than standing up a new one,
+and it ships with chlorine-only dose math. The spa is sequenced second on the same brain, not
+dropped. Full rationale and the phased build in
+[`pool-health-build-plan.md`](pool-health-build-plan.md).
+
+> The spa remains fully specced for its turn:
 > [`spa-health-monitor.md`](spa-health-monitor.md) — BOM sketch, bromine-vs-chlorine dose
 > math, and the floating-vs-inline placement decision.
 

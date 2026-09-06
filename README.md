@@ -109,7 +109,19 @@ See `docs/home-assistant.yaml` for a complete HA configuration.
 ### Postgres + Claude (MCP)
 The `integration/` package ingests MQTT readings into Postgres and exposes the monitor
 to Claude via an MCP server (`get_skimmer_level`, `get_fill_history`, `force_fill`,
-`get_evaporation_rate`). See `integration/README.md` and `docs/SETUP.md`.
+`get_evaporation_rate`, `get_chem_history`). See `integration/README.md` and `docs/SETUP.md`.
+
+## Roadmap: AI pool-health system
+
+Beyond level + auto-fill, an **additive** AI-driven health system is in progress — tracking
+water chemistry, clarity, circulation, and equipment health, with an off-device analyzer +
+Claude (via MCP) turning the data into plain-language guidance. It is **advisory and
+observational only**; the safety-critical level + auto-fill firmware and its interlocks are
+untouched. Being built **pool-first**, with a spa/hot-tub variant planned as a later add-on.
+
+- **[docs/pool-health-build-plan.md](docs/pool-health-build-plan.md)** — build plan of record (phases PH-0…PH-5)
+- [docs/smart-skimmer-ai-vision.md](docs/smart-skimmer-ai-vision.md) — vision & architecture
+- [docs/spa-health-monitor.md](docs/spa-health-monitor.md) — spa variant (later add-on)
 
 ## Documentation
 

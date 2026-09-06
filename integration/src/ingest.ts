@@ -11,6 +11,9 @@ import { db } from "./db.js";
 
 const MQTT_URL = process.env.MQTT_URL ?? "mqtt://localhost:1883";
 const READING_TOPIC = "pool/skimmer/+";
+// `+` matches one level only, so pool/skimmer/+ does NOT catch pool/skimmer/chem/*.
+// The chemistry subtree needs its own subscription.
+const CHEM_TOPIC = "pool/skimmer/chem/+";
 const EVENT_TOPIC = "skimmer/+";
 
 interface ReadingBuffer {
@@ -31,6 +34,30 @@ const FIELD_MAP: Record<string, keyof ReadingBuffer> = {
   humidity: "humidity",
   battery: "battery_v",
   fills_today: "fills_today",
+};
+
+// Chemistry readings (pool-health expansion — PH-1). Assembled the same way:
+// the sense board publishes the chem topics in a burst, debounced into one row.
+// tds/turbidity arrive less often than orp/ph, so most rows carry them as null.
+interface ChemBuffer {
+  orp_mv?: number;
+  ph?: number;
+  water_temp_c?: number;
+  tds_ppm?: number;
+  turbidity_ntu?: number;
+  flow?: boolean;
+}
+
+let chemBuffer: ChemBuffer = {};
+let chemFlushTimer: NodeJS.Timeout | null = null;
+
+const CHEM_FIELD_MAP: Record<string, keyof ChemBuffer> = {
+  orp: "orp_mv",
+  ph: "ph",
+  water_temp: "water_temp_c",
+  tds: "tds_ppm",
+  turbidity: "turbidity_ntu",
+  flow: "flow",
 };
 
 async function flushBuffer() {
@@ -58,6 +85,32 @@ async function flushBuffer() {
   }
 }
 
+async function flushChemBuffer() {
+  if (Object.keys(chemBuffer).length === 0) return;
+
+  const snapshot = { ...chemBuffer };
+  chemBuffer = {};
+  chemFlushTimer = null;
+
+  try {
+    await db.query(
+      `INSERT INTO chem_readings (orp_mv, ph, water_temp_c, tds_ppm, turbidity_ntu, flow)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        snapshot.orp_mv ?? null,
+        snapshot.ph ?? null,
+        snapshot.water_temp_c ?? null,
+        snapshot.tds_ppm ?? null,
+        snapshot.turbidity_ntu ?? null,
+        snapshot.flow ?? null,
+      ],
+    );
+    console.log(`[ingest] inserted chem reading: ${JSON.stringify(snapshot)}`);
+  } catch (err) {
+    console.error("[ingest] chem insert failed:", err);
+  }
+}
+
 async function recordEvent(category: string, payload: string) {
   try {
     await db.query(
@@ -74,14 +127,30 @@ const client = mqtt.connect(MQTT_URL);
 
 client.on("connect", () => {
   console.log(`[mqtt] connected to ${MQTT_URL}`);
-  client.subscribe([READING_TOPIC, EVENT_TOPIC], (err) => {
+  client.subscribe([READING_TOPIC, CHEM_TOPIC, EVENT_TOPIC], (err) => {
     if (err) console.error("[mqtt] subscribe error:", err);
-    else console.log(`[mqtt] subscribed to ${READING_TOPIC}, ${EVENT_TOPIC}`);
+    else console.log(`[mqtt] subscribed to ${READING_TOPIC}, ${CHEM_TOPIC}, ${EVENT_TOPIC}`);
   });
 });
 
 client.on("message", (topic, payload) => {
   const text = payload.toString();
+
+  // Chemistry reading: pool/skimmer/chem/<field> — check before the generic
+  // pool/skimmer/ branch, which these topics also match.
+  if (topic.startsWith("pool/skimmer/chem/")) {
+    const field = topic.split("/")[3];
+    const key = CHEM_FIELD_MAP[field];
+    if (key) {
+      const value: number | boolean =
+        key === "flow" ? /^(1|true|on)$/i.test(text.trim()) : parseFloat(text);
+      (chemBuffer as Record<string, number | boolean>)[key] = value;
+      // Debounce 2s after the last chem topic arrives (same as level readings)
+      if (chemFlushTimer) clearTimeout(chemFlushTimer);
+      chemFlushTimer = setTimeout(flushChemBuffer, 2000);
+    }
+    return;
+  }
 
   // Reading: pool/skimmer/<field>
   if (topic.startsWith("pool/skimmer/")) {
@@ -110,9 +179,11 @@ client.on("error", (err) => {
 
 // Graceful shutdown
 async function shutdown() {
-  console.log("[shutdown] flushing buffer...");
+  console.log("[shutdown] flushing buffers...");
   if (flushTimer) clearTimeout(flushTimer);
+  if (chemFlushTimer) clearTimeout(chemFlushTimer);
   await flushBuffer();
+  await flushChemBuffer();
   await db.end();
   client.end();
   process.exit(0);
