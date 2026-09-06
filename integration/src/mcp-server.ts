@@ -9,6 +9,7 @@
  *   force_fill             — request a manual fill (or stop) via Particle Cloud
  *   get_evaporation_rate   — average daily water loss excluding fill days
  *   get_chem_history       — chemistry (ORP/pH/temp/TDS/turbidity) trends, hourly
+ *   detect_anomalies       — >Nσ daily-fill-count deviations (leak indicator)
  *
  * Register with Claude Code:
  *   claude mcp add skimmer -- npx tsx /path/to/integration/src/mcp-server.ts
@@ -19,6 +20,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { db } from "./db.js";
 import { callParticleFunction } from "./particle.js";
+import { detectAnomalies } from "./analyzer/baselines.js";
 
 const server = new McpServer({ name: "skimmer-monitor", version: "0.1.0" });
 
@@ -196,6 +198,49 @@ server.registerTool(
       sample_count: sampleCount,
       latest: { ...latest[0], reading_age_minutes: ageMinutes },
       hourly,
+    });
+  },
+);
+
+server.registerTool(
+  "detect_anomalies",
+  {
+    description:
+      "Flag days whose auto-fill count deviates more than `sigma` standard deviations from a " +
+      "trailing rolling baseline — the leak indicator (generalizes Phase 6). Runs on daily " +
+      "fill starts over the last N days; zero-fill days are included so a gap counts.",
+    inputSchema: {
+      days: z.number().int().min(7).max(180).default(30),
+      window: z.number().int().min(3).max(60).default(7),
+      sigma: z.number().min(1).max(5).default(2),
+    },
+  },
+  async ({ days, window, sigma }) => {
+    const { rows } = await db.query(
+      `SELECT to_char(d, 'YYYY-MM-DD') AS day, coalesce(f.fills, 0)::int AS fills
+       FROM generate_series(
+              (now() - make_interval(days => $1 - 1))::date,
+              now()::date,
+              interval '1 day'
+            ) AS d
+       LEFT JOIN (
+         SELECT date_trunc('day', ts)::date AS day, count(*) AS fills
+         FROM skimmer_events
+         WHERE category = 'fill' AND payload = 'start'
+           AND ts > now() - make_interval(days => $1)
+         GROUP BY 1
+       ) f ON f.day = d::date
+       ORDER BY d ASC`,
+      [days],
+    );
+
+    const dailySeries = rows.map((r) => ({ label: r.day, value: r.fills }));
+    const report = detectAnomalies(dailySeries, { window, sigma });
+
+    return textResult({
+      metric: "daily_fills",
+      days,
+      ...report,
     });
   },
 );

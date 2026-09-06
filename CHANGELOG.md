@@ -21,6 +21,10 @@
   Langelier Saturation Index, chlorine dose calculator, and pH-adjustment estimate; all pure,
   unit-checked, clamped, advisory-only. 12 unit tests (`npm test`); added `test` + `typecheck`
   npm scripts.
+- **PH-3 anomaly detection** (software): `integration/src/analyzer/baselines.ts` — trailing
+  rolling mean/stddev + >Nσ anomaly flagging (generalizes Phase 6), and a `detect_anomalies`
+  MCP tool over daily fill counts as the leak indicator. 9 unit tests. MCP server now exposes
+  6 tools.
 
 ## [0.2.0] - 2026-07-05
 ### Added

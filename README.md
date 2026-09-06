@@ -109,7 +109,8 @@ See `docs/home-assistant.yaml` for a complete HA configuration.
 ### Postgres + Claude (MCP)
 The `integration/` package ingests MQTT readings into Postgres and exposes the monitor
 to Claude via an MCP server (`get_skimmer_level`, `get_fill_history`, `force_fill`,
-`get_evaporation_rate`, `get_chem_history`). See `integration/README.md` and `docs/SETUP.md`.
+`get_evaporation_rate`, `get_chem_history`, `detect_anomalies`). See `integration/README.md`
+and `docs/SETUP.md`.
 
 ## Roadmap: AI pool-health system
 

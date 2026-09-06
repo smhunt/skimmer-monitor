@@ -59,7 +59,8 @@ skimmer-monitor/
 │   └── config.h                All tunables — no magic numbers in main code
 ├── integration/
 │   ├── src/ingest.ts           MQTT → Postgres bridge (long-lived, PM2)
-│   ├── src/mcp-server.ts       MCP server: 5 skimmer tools for Claude
+│   ├── src/mcp-server.ts       MCP server: 6 skimmer tools for Claude
+│   ├── src/analyzer/           Deterministic PH-3 core (chemistry, baselines) + tests
 │   ├── src/particle.ts         Particle Cloud function caller
 │   ├── src/db.ts               Shared pg pool
 │   └── schema.sql              Postgres DDL

@@ -81,7 +81,10 @@ The math that must **not** live in an LLM.
   (pH, temp, TDS, hardness, alkalinity → corrosive/balanced/scaling), chlorine dose calculator,
   and pH-adjustment estimate. All pure, unit-checked, clamped to a single conservative
   correction, advisory-only. **12 unit tests green** (`npm test`).
-- [ ] Rolling baselines + >2σ anomaly flags (generalize `prompt_plan.md` Phase 6 to every signal).
+- [x] **Rolling baselines + >Nσ anomaly flags** — `integration/src/analyzer/baselines.ts`
+  (trailing-window mean/stddev, flat-baseline handling) + a `detect_anomalies` MCP tool over
+  daily fill counts (the leak indicator, generalizing Phase 6). 9 unit tests green. Runs on
+  the level/fill data that already exists — no new hardware.
 - [ ] Evaporation-vs-leak separation (correlate draw-down with weather + temperature).
 - [ ] Service wiring: subscribe chem readings, compute, emit `skimmer/health` and
   `skimmer/chem-alert` (into `skimmer_events`). Needs live signals (after PH-2).
