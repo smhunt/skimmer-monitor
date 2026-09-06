@@ -17,6 +17,10 @@
   - `get_chem_history(days)` MCP tool (hourly ORP/pH/temp/TDS/turbidity trends)
   - `pool/skimmer/chem/*` topics + health/chem-alert/clarity-alert events documented in
     `docs/mqtt-schema.md`
+- **PH-3 chemistry core** (software, deterministic): `integration/src/analyzer/chemistry.ts` —
+  Langelier Saturation Index, chlorine dose calculator, and pH-adjustment estimate; all pure,
+  unit-checked, clamped, advisory-only. 12 unit tests (`npm test`); added `test` + `typecheck`
+  npm scripts.
 
 ## [0.2.0] - 2026-07-05
 ### Added

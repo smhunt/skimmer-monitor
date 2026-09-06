@@ -44,6 +44,17 @@ claude mcp add skimmer -- npx tsx /path/to/skimmer-monitor/integration/src/mcp-s
 `force_fill` requires `PARTICLE_TOKEN` and `PARTICLE_DEVICE` in the environment.
 The read-only tools need only `DATABASE_URL`.
 
+## Analyzer (pool-health)
+
+`src/analyzer/chemistry.ts` is the deterministic chemistry core (PH-3): Langelier
+Saturation Index, chlorine dose, and pH-adjustment math — pure, unit-checked, clamped,
+advisory-only. It is the "numbers, never the LLM" layer the recommend_dose tool will call.
+
+```bash
+npm test         # node:test unit suite (chemistry math)
+npm run typecheck # tsc --noEmit
+```
+
 ## Environment
 
 | Variable | Default | Used by |
