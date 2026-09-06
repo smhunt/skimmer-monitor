@@ -295,6 +295,42 @@
 
 ---
 
+## 2026-09-06 — PH-3 anomaly detection (rolling baselines + leak indicator)
+
+**What changed**:
+- `integration/src/analyzer/baselines.ts` — deterministic rolling-baseline stats:
+  `mean`, `sampleStdDev`, and `detectAnomalies()` (trailing-window baseline so a spike
+  can't hide in its own baseline; flat-baseline handled with z=null). Generalizes
+  `prompt_plan.md` Phase 6.
+- `integration/src/mcp-server.ts` — new `detect_anomalies(days, window, sigma)` tool over
+  daily fill counts (densified with zero-fill days via `generate_series`) — the leak
+  indicator. MCP server now exposes **6 tools**.
+- `integration/src/analyzer/baselines.test.ts` — 9 node:test cases (spike high / drop low /
+  in-band / flat-baseline / sigma threshold / no-history / invalid opts).
+- Docs: build-plan PH-3 baselines item done; CHANGELOG, READMEs, docs/README updated.
+
+**Why**:
+- The one remaining hardware-independent PH-3 piece — it runs on the level/fill data that
+  already exists in `skimmer_readings`/`skimmer_events`, so it delivers value before PH-2.
+
+**Tested**:
+- `npm test` → 21/21 pass (12 chemistry + 9 baselines). `npx tsc --noEmit` clean. MCP
+  `tools/list` returns 6 tools incl `detect_anomalies`. **Not run here:** the tool's live SQL
+  round-trip (needs the DB on 10.10.10.24) — the query densifies zero-fill days via
+  `generate_series` and is structurally verified, not live-run.
+
+**Open issues**:
+- Remaining PH-3: evaporation-vs-leak (needs weather API) and the service that emits
+  `skimmer/health` (needs live chem signals, post-PH-2).
+- Live checks pending on 10.10.10.24: PH-1 chem round-trip + `detect_anomalies` against real
+  fill history.
+
+**Next**:
+- PH-2 parts order (ESP32-S3 + probes) is the gating hardware step; software PH-3 is now as
+  far as it can go without live signals or the weather API.
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title

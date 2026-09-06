@@ -34,6 +34,7 @@ Exposes the skimmer to Claude over stdio:
 | `force_fill(action)` | Start/stop fill via Particle Cloud (firmware interlocks stay authoritative) |
 | `get_evaporation_rate(days)` | Avg daily water loss, fill days excluded |
 | `get_chem_history(days)` | Hourly ORP/pH/temp/TDS/turbidity trends + latest snapshot (empty until PH-2) |
+| `detect_anomalies(days, window, sigma)` | Days whose fill count deviates >σ from a rolling baseline (leak indicator) |
 
 Register with Claude Code:
 
@@ -46,9 +47,11 @@ The read-only tools need only `DATABASE_URL`.
 
 ## Analyzer (pool-health)
 
-`src/analyzer/chemistry.ts` is the deterministic chemistry core (PH-3): Langelier
-Saturation Index, chlorine dose, and pH-adjustment math — pure, unit-checked, clamped,
-advisory-only. It is the "numbers, never the LLM" layer the recommend_dose tool will call.
+`src/analyzer/` is the deterministic PH-3 core — pure, unit-checked, advisory-only, the
+"numbers, never the LLM" layer the pool-health tools call:
+- `chemistry.ts` — Langelier Saturation Index, chlorine dose, pH-adjustment math (clamped).
+- `baselines.ts` — trailing rolling mean/stddev + >Nσ anomaly flagging (leak indicator);
+  backs the `detect_anomalies` tool.
 
 ```bash
 npm test         # node:test unit suite (chemistry math)
