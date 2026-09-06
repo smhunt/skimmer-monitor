@@ -222,6 +222,44 @@
 
 ---
 
+## 2026-09-06 — PH-1 software complete; docs/roadmaps reconciled
+
+**What changed**:
+- **PH-1 wired through the live pipeline (software):**
+  - `integration/src/ingest.ts` — subscribes `pool/skimmer/chem/+` (separate from
+    `pool/skimmer/+`, since MQTT `+` matches one level), debounce-assembles a
+    `chem_readings` row, parses `flow` as boolean, flushes on shutdown.
+  - `integration/src/mcp-server.ts` — new `get_chem_history(days)` tool (hourly
+    ORP/pH/temp/TDS/turbidity averages + latest snapshot; clear "not yet publishing"
+    message while the table is empty pre-PH-2).
+  - `docs/mqtt-schema.md` — `pool/skimmer/chem/*` topics, health/chem-alert/clarity-alert
+    events, example payloads.
+- **Docs/roadmaps/changelogs reconciled to the pool-first health build:** README (new
+  "Roadmap: AI pool-health system" + `get_chem_history`), `prompt_plan.md` (new Phase 7
+  PH-0…PH-5, pH/ORP moved out of "out of scope"), `docs/README.md` (chem_readings, 5 tools),
+  `CHANGELOG.md` (Unreleased section), `integration/README.md`.
+
+**Why**:
+- Finish PH-1's software side against the already-deployed pipeline; keep every roadmap/README
+  consistent with the recorded pool-first decision.
+
+**Tested**:
+- `npm install` + `npx tsc --noEmit` clean. MCP `tools/list` over stdio returns 5 tools
+  including `get_chem_history`. Chem topic routing + `flow` boolean parsing verified against
+  10 cases. **Not run here:** the live `mosquitto_pub → chem_readings row` round-trip — that
+  needs the broker/DB on 10.10.10.24 and is PH-1's exit criterion.
+
+**Open issues**:
+- Live PH-1 exit test pending (apply `schema.sql`, restart `skimmer-ingest`, publish a chem
+  reading, confirm `get_chem_history` returns it).
+- PH-2 hardware not started; confirm ESP32-S3 + order probes.
+
+**Next**:
+- PH-3 groundwork that needs no hardware: build the deterministic chemistry core (Langelier
+  index + chlorine dose math) as a unit-tested module.
+
+---
+
 ## Checkpoint Template (for future entries)
 
 ### YYYY-MM-DD — Brief title

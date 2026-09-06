@@ -51,11 +51,28 @@ Wireless in-skimmer water level monitor with auto-fill control, integrating with
 - [ ] Weekly evaporation trend (correlate with temperature)
 - [ ] Compare against weather API rainfall data
 
+### Phase 7: AI Pool-Health Expansion (PH-0…PH-5)
+
+Additive, advisory/observational system that tracks chemistry, clarity, circulation, and
+equipment health — the safety-critical level + auto-fill firmware stays untouched. Built
+**pool-first**; spa is a later add-on on the same shared brain. Full plan of record:
+**[docs/pool-health-build-plan.md](docs/pool-health-build-plan.md)**.
+
+- [x] PH-0 — vision, architecture, data contract, pool-first decision
+- [~] PH-1 — data contract & storage: `chem_readings`, ingest of `pool/skimmer/chem/*`,
+  `get_chem_history` MCP tool (software done; live end-to-end test pending)
+- [ ] PH-2 — chemistry sense board bring-up (ESP32-S3 + ORP/pH/temp), galvanic isolation
+- [ ] PH-3 — analyzer service: baselines, Langelier index, chlorine dose math, evap-vs-leak
+- [ ] PH-4 — AI layer: `get_pool_health`, `diagnose`, `recommend_dose`, `weekly_report`
+- [ ] PH-5 — clarity (turbidity/algae) + advisory dosing
+
 ## Out of Scope (For Now)
 
-- pH/ORP sensors — separate module
+- pH/ORP sensors as a standalone module — **superseded**: now folded into the Phase 7
+  pool-health expansion above (integrated, not a separate module)
 - Flow rate metering — separate module
 - Multi-skimmer support (single skimmer pool)
+- Automated chemical dosing — deferred pending a dedicated safety review (see build plan PH-5)
 
 ## Risk Register
 
